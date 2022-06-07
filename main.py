@@ -5,7 +5,6 @@ import numpy as np
 import handguesture as hg
 import pyautogui as pg
 
-
 def main():
     # frame size
     s_width, s_height = 850, 850
@@ -39,7 +38,8 @@ def main():
             x, y = land[8][1:]
             mx, my = land[12][1:]
             rx, ry = land[16][1:]
-
+            lx, ly = land[20][1:]
+            tx, ty = land[4][1:]
             finger = hand.finger_up()
             if finger[1] == 1 and \
                     finger[2] == 0 and \
@@ -50,7 +50,7 @@ def main():
 
                 n_loc_x = p_loc_x + (x3 - p_loc_x) / smoothing_value
                 n_loc_y = p_loc_y + (y3 - p_loc_y) / smoothing_value
-                #pg.moveTo(n_loc_x, n_loc_y)
+                # pg.moveTo(n_loc_x, n_loc_y)
                 mouse.move(n_loc_x, n_loc_y, absolute=True, duration=0)
 
                 p_loc_x, p_loc_y = n_loc_x, n_loc_y
@@ -60,7 +60,7 @@ def main():
                     finger[2] == 1 and \
                     finger[3] == 0 and \
                     finger[4] == 0:
-                #mouse.click()
+                # mouse.click()
                 pg.click()
                 cv.circle(frame1, (x, y), 15, (0, 255, 128), cv.FILLED)
                 cv.circle(frame1, (mx, my), 15, (102, 255, 128), cv.FILLED)
@@ -69,12 +69,27 @@ def main():
                     finger[2] == 1 and \
                     finger[3] == 1 and \
                     finger[4] == 0:
-                #mouse.right_click()
+                # mouse.right_click()
+
+                time.sleep(0.5)
                 pg.rightClick()
+
                 cv.circle(frame1, (x, y), 15, (153, 51, 255), cv.FILLED)
                 cv.circle(frame1, (mx, my), 15, (153, 51, 255), cv.FILLED)
                 cv.circle(frame1, (rx, ry), 15, (153, 51, 255), cv.FILLED)
-
+            if finger[1] == 0 and \
+                    finger[2] == 0 and \
+                    finger[3] == 0 and \
+                    finger[4] == 1:
+                pg.scroll(-2, _pause=1)
+                cv.circle(frame1, (lx, ly), 15, (102, 255, 128), cv.FILLED)
+            if finger[0] == 1 and \
+                    finger[1] == 0 and \
+                    finger[2] == 0 and \
+                    finger[3] == 0 and \
+                    finger[4] == 0:
+                pg.scroll(2, _pause=1)
+                cv.circle(frame1, (tx, ty), 15, (102, 255, 128), cv.FILLED)
 
         cv.rectangle(frame1, (x1, y1), (x2, y2), (250, 0, 0), 3)
 
