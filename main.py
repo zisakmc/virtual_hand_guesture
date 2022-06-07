@@ -1,84 +1,85 @@
 import cv2 as cv
 import mouse
-import numpy as np
 import time
-import mediapipe as mp
-import tensorflow as tf
+import numpy as np
+import handguesture as hg
 
 
+def main():
+    # frame size
+    s_width, s_height = 850, 850
+    w_screen, h_screen = 1080, 1920
 
-def guesture():
-    swidth, sheight = 700, 600
+    p_loc_x, p_loc_y = 0, 0
+    n_loc_x, n_loc_y = 0, 0
+    smoothing_value = 5
 
-    x1, x2 = 85, 550
-    y1, y2 = 85, 400
+    # rectangle size
+    x1, x2 = 45, 475
+    y1, y2 = 45, 325
 
     vid = cv.VideoCapture(0)
-    vid.set(3, swidth)
-    vid.set(4, sheight)
+    vid.set(3, s_width)
+    vid.set(4, s_height)
     ptime = 0
-
-
-    mpHands = mp.solutions.hands
-    hands = mpHands.Hands(static_image_mode=True, max_num_hands=1, min_detection_confidence=0.2)
-    draw = mp.solutions.drawing_utils
-
-
+    hand = hg.virtual_hand()
     while True:
-        rec, frame = vid.read()
-        h, w, c = frame.shape
-        ctime = time.time()
-        fps = 1/(ctime-ptime)
-        ptime = ctime
+        rec, img = vid.read()
+        c_time = time.time()
+        fps = 1 / (c_time - ptime)
+        ptime = c_time
+        img = cv.flip(img, 1)
+        cv.putText(img, f'FPS:{int(fps)}', (15, 30), cv.QT_FONT_NORMAL, 1, (190, 37, 155), 2)
 
-        frame=cv.flip(frame, 1)
-        cv.rectangle(frame, (x1, y1), (x2, y2), (250, 0, 0), 3)
+        frame1 = hand.tracking(img)
+        land = hand.position(frame1)
 
-        cv.putText(frame, f'FPS:{int(fps)}', (23, 60), cv.QT_FONT_NORMAL, 1, (190, 37, 155), 2)
-        ##convert to BGR 2 RGB
-        frame_rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
-        frame_rgb.flags.writeable = False
-        result = hands.process(frame_rgb)
+        if len(land) != 0:
+            x, y = land[8][1:]
+            mx, my = land[12][1:]
+            rx, ry = land[16][1:]
 
+            finger = hand.finger_up()
+            if finger[1] == 1 and \
+                    finger[2] == 0 and \
+                    finger[3] == 0 and \
+                    finger[4] == 0:
+                x3 = np.interp(x, (x1, x2), (0, w_screen))
+                y3 = np.interp(y, (y1, y2), (0, h_screen))
 
-        ##convet back to RGB 2 BGR
-        frame_rgb = cv.cvtColor(frame_rgb, cv.COLOR_RGB2BGR)
-       # print("handed:", result.multi_handedness)
+                n_loc_x = p_loc_x + (x3 - p_loc_x) / smoothing_value
+                n_loc_y = p_loc_y + (y3 - p_loc_y) / smoothing_value
 
-        ##single hand detection
+                mouse.move(n_loc_x, n_loc_y, absolute=True, duration=0)
 
-        if result.multi_hand_landmarks:
-            landmarks = []
-            for handslms in result.multi_hand_landmarks:
-                for ids, lm in enumerate(handslms.landmark):
-                    lmx = int(lm.x * w) ##x co ordinate of hand
-                    lmy = int(lm.y * h) ##y co ordinate of hand
-                    landmarks.append([ids, lmx, lmy])
+                p_loc_x, p_loc_y = n_loc_x, n_loc_y
+                cv.circle(frame1, (x, y), 15, (0, 255, 255), cv.FILLED)
 
-                    if ids==8:
-                        cv.circle(frame_rgb, (lmx, lmy), 15, (0, 0, 255), cv.FILLED)
-                        mouse.move(lmx, lmy, absolute=True, duration= 0)
-                draw.draw_landmarks(frame_rgb, handslms, mpHands.HAND_CONNECTIONS,
-                                    draw.DrawingSpec(color=(190, 37, 155), thickness=4, circle_radius=5),
+            if finger[1] == 1 and \
+                    finger[2] == 1 and \
+                    finger[3] == 0 and \
+                    finger[4] == 0:
+               # mouse.click()
+                cv.circle(frame1, (x, y), 15, (0, 255, 128), cv.FILLED)
+                cv.circle(frame1, (mx, my), 15, (102, 255, 128), cv.FILLED)
 
-                                    draw.DrawingSpec(color=(0, 128, 255), thickness=4, circle_radius=5))
+            if finger[1] == 1 and \
+                    finger[2] == 1 and \
+                    finger[3] == 1 and \
+                    finger[4] == 0:
+                cv.circle(frame1, (x, y), 15, (153, 51, 255), cv.FILLED)
+                cv.circle(frame1, (mx, my), 15, (153, 51, 255), cv.FILLED)
+                cv.circle(frame1, (rx, ry), 15, (153, 51, 255), cv.FILLED)
 
+        cv.rectangle(frame1, (x1, y1), (x2, y2), (250, 0, 0), 3)
 
-            # print(landmarks)
-            # for hand_landmarks in result.multi_hand_landmarks:
-            #
-            #     x = hand_landmarks.landmark[mpHands.HandLandmark.INDEX_FINGER_TIP].x * 1920
-            #     y = hand_landmarks.landmark[mpHands.HandLandmark.INDEX_FINGER_TIP].y * 1080
-            #     #qcv.circle(frame_rgb, (x, y), 13, (255, 0, 255), cv.FILLED)
-            #     mouse.move(x, y, absolute=True, duration=0)
-        ##display the capture vid
-        frame_rgb.flags.writeable = True
-        cv.imshow("frame", frame_rgb)
+        cv.imshow("frame", frame1)
         if cv.waitKey(1) & 0xFF == ord("q"):
             break
+
     vid.release()
     cv.destroyAllWindows()
 
 
 if __name__ == '__main__':
-    guesture()
+    main()
