@@ -14,7 +14,7 @@ class virtual_hand:
                                         min_tracking_confidence=0.5)
 
         self.draw = mp.solutions.drawing_utils
-        self.idtip = [4, 8, 12, 16, 20]
+        self.id_tip = [4, 8, 12, 16, 20]
 
     def tracking(self, img, draw=True):
         frame_rgb = cv.cvtColor(img, cv.COLOR_BGR2RGB)
@@ -44,17 +44,16 @@ class virtual_hand:
 
     def finger_up(self):
         finger = []
-        if self.landmarks[self.idtip[0]][1] < self.landmarks[self.idtip[0] - 1][1]:
+        # thump check up or not
+        if self.landmarks[self.id_tip[0]][1] < self.landmarks[self.id_tip[0] - 1][1]:
             finger.append(1)
         else:
             finger.append(0)
-
-        for id in range(1, 5):
-            if self.landmarks[self.idtip[id]][2] < self.landmarks[self.idtip[id] - 2][2]:
+        # finger check up or not
+        for ids in range(1, 5):
+            if self.landmarks[self.id_tip[ids]][2] < self.landmarks[self.id_tip[ids] - 2][2]:
                 finger.append(1)
             else:
                 finger.append(0)
 
         return finger
-
-

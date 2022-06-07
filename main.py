@@ -8,7 +8,7 @@ import handguesture as hg
 def main():
     # frame size
     s_width, s_height = 850, 850
-    w_screen, h_screen = 1080, 1920
+    w_screen, h_screen = 1920, 1080
 
     p_loc_x, p_loc_y = 0, 0
     n_loc_x, n_loc_y = 0, 0
@@ -59,7 +59,7 @@ def main():
                     finger[2] == 1 and \
                     finger[3] == 0 and \
                     finger[4] == 0:
-               # mouse.click()
+                mouse.click()
                 cv.circle(frame1, (x, y), 15, (0, 255, 128), cv.FILLED)
                 cv.circle(frame1, (mx, my), 15, (102, 255, 128), cv.FILLED)
 
@@ -67,6 +67,7 @@ def main():
                     finger[2] == 1 and \
                     finger[3] == 1 and \
                     finger[4] == 0:
+                mouse.right_click()
                 cv.circle(frame1, (x, y), 15, (153, 51, 255), cv.FILLED)
                 cv.circle(frame1, (mx, my), 15, (153, 51, 255), cv.FILLED)
                 cv.circle(frame1, (rx, ry), 15, (153, 51, 255), cv.FILLED)
