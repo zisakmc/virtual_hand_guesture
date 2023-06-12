@@ -1,6 +1,7 @@
 import cv2 as cv
 import mediapipe as mp
-
+from math import hypot
+import numpy as np
 
 class virtual_hand:
     def __init__(self):
@@ -57,3 +58,36 @@ class virtual_hand:
                 finger.append(0)
 
         return finger
+
+    def distace_index_and_thump(self):
+        x1, y1 = self.landmarks[4][1], self.landmarks[4][2]  # thumb
+        x2, y2 = self.landmarks[8][1], self.landmarks[8][2]  # index finger
+        # creating circle at the tips of thumb and index finger
+        hypo = hypot(x2 - x1, y2 - y1) ## calculating hypotenuse
+        length = np.interp(hypo, [30, 350], [0, 10]) ## scalling 0 - 10
+        return length
+
+
+    def distace_index_and_middle(self):
+        x1, y1 = self.landmarks[12][1], self.landmarks[12][2]  # middle
+        x2, y2 = self.landmarks[8][1], self.landmarks[8][2]  # index finger
+        # creating circle at the tips of thumb and index finger
+        hypo = hypot(x2 - x1, y2 - y1) ## calculating hypotenuse
+        length = np.interp(hypo, [30, 350], [0, 10]) ## scalling 0 - 10
+        return length
+
+    def distace_middle_and_ring(self):
+        x1, y1 = self.landmarks[12][1], self.landmarks[12][2]  # middle finger
+        x2, y2 = self.landmarks[16][1], self.landmarks[16][2]  # ring finger
+        # creating circle at the tips of thumb and index finger
+        hypo = hypot(x2 - x1, y2 - y1) ## calculating hypotenuse
+        length = np.interp(hypo, [30, 350], [0, 10]) ## scalling 0 - 10
+        return length
+
+    def distace_ring_and_pinky(self):
+        x1, y1 = self.landmarks[15][1], self.landmarks[15][2]  # ring finger
+        x2, y2 = self.landmarks[20][1], self.landmarks[20][2]  # pinky finger
+        # creating circle at the tips of thumb and index finger
+        hypo = hypot(x2 - x1, y2 - y1) ## calculating hypotenuse
+        length = np.interp(hypo, [30, 350], [0, 10]) ## scalling 0 - 10
+        return length
